@@ -8,6 +8,7 @@
 #include "control/state_machine.h"
 #include "actuators/motor.h"
 #include "actuators/servo_ctrl.h"
+#include "utils/bt_debug.h"
 
 // ═══ GLOBAL OBJECTS ═══
 static UltrasonicSensor usLeft;
@@ -106,6 +107,10 @@ void setup() {
     // FSM starts in wait state
     fsm = StateMachine();
 
+#ifdef DEBUG_BT_ENABLED
+    BtDebug::init();
+#endif
+
     Serial.printf("[BOOT] Setup complete. Waiting for start button...\n");
 }
 
@@ -140,6 +145,11 @@ void loop() {
         }
         Serial.printf("\n");
     }
+
+#ifdef DEBUG_BT_ENABLED
+    BtDebug::processIncoming();
+    BtDebug::update(local, fsm);
+#endif
 
     delay(CONTROL_LOOP_MS);
 }
