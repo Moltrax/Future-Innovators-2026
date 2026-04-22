@@ -1,5 +1,14 @@
 #pragma once
 
+// ═══ DEBUG CONFIG ═══
+// Uncomment the line below ONLY for bench testing / development
+// This MUST be commented out for competition builds
+#define DEBUG_BT_ENABLED
+#ifdef DEBUG_BT_ENABLED
+#define BT_DEVICE_NAME      "WRO2026_DEBUG"
+#define BT_SEND_INTERVAL_MS 200
+#endif
+
 // ═══ CHALLENGE CONFIG ═══
 #define CHALLENGE_MODE          1       // 0=open, 1=obstacle
 #define DRIVING_DIRECTION       1       // 1=CW, -1=CCW
