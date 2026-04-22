@@ -60,25 +60,27 @@ void setup() {
     Serial.printf("\n[BOOT] WRO 2026 Future Engineers\n");
     Serial.printf("[BOOT] Challenge=%d Direction=%d\n", CHALLENGE_MODE, DRIVING_DIRECTION);
 
-    // I2C for gyro
+    // I2C bus for the GY-521 (MPU-6050) module
     Wire.begin(SDA_PIN, SCL_PIN);
+    Wire.setClock(400000); // 400kHz fast mode — MPU-6050 supports up to 400kHz
 
-    // Gyro init + calibration (blocking ~3s, vehicle must be still)
+    // GY-521 / MPU-6050 init + gyro offset calibration
+    // Blocks for ~3 seconds, vehicle MUST be stationary on flat surface
     gyro.init();
 
     // PixyCam2 init
     pixyCam.init();
     Serial.printf("[BOOT] PixyCam2 initialized\n");
 
-    // Servo init
+    // Servo init — centers steering
     steeringServo.init();
     Serial.printf("[BOOT] Servo centered\n");
 
-    // Motor init
+    // Motor init — single rear DC motor via H-bridge
     motor.init();
     Serial.printf("[BOOT] Motor ready\n");
 
-    // Ultrasonic init
+    // Ultrasonic sensors init
     usLeft.init(TRIG_L, ECHO_L);
     usRight.init(TRIG_R, ECHO_R);
     Serial.printf("[BOOT] Ultrasonics ready\n");
@@ -86,10 +88,10 @@ void setup() {
     // Start button
     pinMode(START_BUTTON_PIN, INPUT_PULLUP);
 
-    // Create mutex
+    // Create mutex for shared sensor data
     sensorMutex = xSemaphoreCreateMutex();
 
-    // Init shared data
+    // Zero out shared data
     memset((void*)&sharedSensorData, 0, sizeof(SensorData));
 
     // Create sensor task on Core 0
@@ -130,13 +132,17 @@ void loop() {
     unsigned long now = millis();
     if (now - lastDebugMs >= DEBUG_PRINT_MS) {
         lastDebugMs = now;
-        Serial.printf("[%s] L=%.0f R=%.0f H=%.1f Lap=%d Spd=%d Str=%.0f",
+        Serial.printf("[%s] L=%.0f R=%.0f H=%.1f Y=%.1f Lap=%d C=%d Spd=%d Str=%.0f",
             fsm.getStateName(),
             local.distL, local.distR,
-            local.heading, local.lapCount,
+            local.heading, local.yawRate,
+            local.lapCount, local.cornerCount,
             fsm.targetSpeed, fsm.targetSteerAngle);
         if (local.pillar.detected) {
             Serial.printf(" P:s%d d=%.0f", local.pillar.signature, local.pillar.distanceEst);
+        }
+        if (local.parkingMarker.detected) {
+            Serial.printf(" M:d=%.0f", local.parkingMarker.distanceEst);
         }
         Serial.printf("\n");
     }

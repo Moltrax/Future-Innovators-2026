@@ -9,12 +9,12 @@
 #define ECHO_L              14
 #define TRIG_R              27
 #define ECHO_R              26
-#define MOTOR_PWM           32
-#define MOTOR_DIR1          33
-#define MOTOR_DIR2          25
+#define MOTOR_PWM_PIN       32
+#define MOTOR_DIR_A         33
+#define MOTOR_DIR_B         25
 #define SERVO_PIN           13
-#define SDA_PIN             21
-#define SCL_PIN             22
+#define SDA_PIN             21      // GY-521 (MPU-6050) SDA
+#define SCL_PIN             22      // GY-521 (MPU-6050) SCL
 #define START_BUTTON_PIN    4
 
 // ═══ ULTRASONIC ═══
@@ -22,6 +22,11 @@
 #define US_MAX_CM           150
 #define MEDIAN_WINDOW       5
 #define SENSOR_SPACING_CM   15.0f
+
+// ═══ GY-521 / MPU-6050 ═══
+#define GYRO_CALIBRATION_MS     3000    // Time to hold still for offset calibration
+#define COMP_FILTER_ALPHA       0.95f   // Gyro trust ratio in complementary filter
+#define GYRO_DRIFT_THRESHOLD    0.05f   // Ignore yaw rates below this (deg/s)
 
 // ═══ PIXY ═══
 #define PIXY_SIG_RED        1
@@ -68,9 +73,6 @@
 #define REACTION_DIST_FAST      60.0f
 #define REACTION_DIST_MEDIUM    40.0f
 #define REACTION_DIST_SLOW      25.0f
-
-// ═══ COMPLEMENTARY FILTER ═══
-#define COMP_FILTER_ALPHA   0.95f
 
 // ═══ SCHMITT TRIGGER ═══
 #define OBSTACLE_SCHMITT_LOW    25.0f
