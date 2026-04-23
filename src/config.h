@@ -3,7 +3,7 @@
 // ═══ DEBUG CONFIG ═══
 // Uncomment the line below ONLY for bench testing / development
 // This MUST be commented out for competition builds
-#define DEBUG_BT_ENABLED
+// #define DEBUG_BT_ENABLED
 #ifdef DEBUG_BT_ENABLED
 #define BT_DEVICE_NAME      "EAGoats_FI_WRO2026_DEBUG"
 #define BT_SEND_INTERVAL_MS 200

@@ -35,8 +35,12 @@ int StateMachine::speedForPillarDist(float dist) {
 }
 
 void StateMachine::update(const SensorData& sd, float dt) {
-    float distL = sd.distL;
-    float distR = sd.distR;
+    // Keep both raw and corrected (perpendicular) distances
+    float rawDistL = sd.distL;
+    float rawDistR = sd.distR;
+    // Use corrected distances (perpendicular to wall) for PD centering
+    float distL = sd.distL_corr;
+    float distR = sd.distR_corr;
     BlockInfo pillar = sd.pillar;
     BlockInfo parking = sd.parkingMarker;
     float heading = sd.heading;
@@ -165,8 +169,9 @@ void StateMachine::update(const SensorData& sd, float dt) {
 
         // Detect parking lot: magenta marker via Pixy OR sudden gap in US reading
         bool magentaSeen = parking.detected && parking.distanceEst < REACTION_DIST_FAST;
-        // Gap detection: one US sensor suddenly reads much farther (parking opening)
-        bool gapDetected = (distR > GAP_SCHMITT_HIGH) || (distL > GAP_SCHMITT_HIGH);
+        // Gap detection: use raw ultrasonic readings because thresholds are based
+        // on direct sensor measurements (not corrected perpendicular values)
+        bool gapDetected = (rawDistR > GAP_SCHMITT_HIGH) || (rawDistL > GAP_SCHMITT_HIGH);
 
         if (magentaSeen || gapDetected) {
             enterState(PARKING_ALIGN);
@@ -219,7 +224,7 @@ void StateMachine::update(const SensorData& sd, float dt) {
 
         // Check if parallel: both US readings close to equal
         bool isParallel = fabsf(distL - distR) < PARKING_PARALLEL_TOL;
-        // Check if inside lot: both readings are reasonable
+        // Check if inside lot: both corrected readings are within reasonable range
         bool insideLot = (distL < 30.0f && distR < 30.0f);
 
         if (isParallel && insideLot) {

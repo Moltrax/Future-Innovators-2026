@@ -124,11 +124,13 @@ void update(const SensorData& sd, const StateMachine& fsm) {
 
     // Build telemetry string
     int len = snprintf(txBuf, sizeof(txBuf),
-        "%lu,%s,%.1f,%.1f,%.1f,%.1f,%d,%d,%d,%.0f",
+        "%lu,%s,%.1f,%.1f,%.1f,%.1f,%.1f,%d,%d,%d,%.0f",
         now,
         fsm.getStateName(),
         sd.distL,
         sd.distR,
+        sd.distL_corr,
+        sd.distR_corr,
         sd.heading,
         sd.yawRate,
         sd.lapCount,

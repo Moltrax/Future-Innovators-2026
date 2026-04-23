@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include <math.h>
 #include "config.h"
 #include "sensors/ultrasonic.h"
 #include "sensors/pixy_cam.h"
@@ -39,10 +40,26 @@ void sensorTask(void* param) {
 
         gyro.update(dL, dR);
 
+        // Compute perpendicular (corrected) distances using vehicle yaw inferred
+        // from the difference between side ultrasonics. If valid, the local
+        // angle (radians) is atan2(dL - dR, sensor_spacing). The measured
+        // ultrasonic distance is along the sensor beam, so the perpendicular
+        // distance = measured * cos(phi).
+        float dL_corr = dL;
+        float dR_corr = dR;
+        bool usValid = (dL > 2.0f && dL < (float)US_MAX_CM && dR > 2.0f && dR < (float)US_MAX_CM);
+        if (usValid) {
+            float phi = atan2f(dL - dR, SENSOR_SPACING_CM); // radians
+            float c = cosf(phi);
+            dL_corr = dL * c;
+            dR_corr = dR * c;
+        }
         // Write to shared struct under mutex
         if (xSemaphoreTake(sensorMutex, pdMS_TO_TICKS(5)) == pdTRUE) {
             sharedSensorData.distL = dL;
             sharedSensorData.distR = dR;
+            sharedSensorData.distL_corr = dL_corr;
+            sharedSensorData.distR_corr = dR_corr;
             sharedSensorData.pillar = pillar;
             sharedSensorData.parkingMarker = parkMarker;
             sharedSensorData.heading = gyro.getHeading();
@@ -137,9 +154,9 @@ void loop() {
     unsigned long now = millis();
     if (now - lastDebugMs >= DEBUG_PRINT_MS) {
         lastDebugMs = now;
-        Serial.printf("[%s] L=%.0f R=%.0f H=%.1f Y=%.1f Lap=%d C=%d Spd=%d Str=%.0f",
+        Serial.printf("[%s] L=%.0f R=%.0f Lc=%.0f Rc=%.0f H=%.1f Y=%.1f Lap=%d C=%d Spd=%d Str=%.0f",
             fsm.getStateName(),
-            local.distL, local.distR,
+            local.distL, local.distR, local.distL_corr, local.distR_corr,
             local.heading, local.yawRate,
             local.lapCount, local.cornerCount,
             fsm.targetSpeed, fsm.targetSteerAngle);

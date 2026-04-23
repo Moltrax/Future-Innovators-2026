@@ -22,6 +22,9 @@ enum FSMState {
 struct SensorData {
     volatile float distL;
     volatile float distR;
+    // Distances corrected for vehicle yaw relative to wall (perpendicular distance)
+    volatile float distL_corr;
+    volatile float distR_corr;
     BlockInfo pillar;
     BlockInfo parkingMarker;
     volatile float heading;
