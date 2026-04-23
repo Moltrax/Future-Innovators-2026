@@ -47,7 +47,7 @@
 #define PIXY_FRAME_CENTER   158
 
 // ═══ PD CONTROLLER ═══
-#define KP_STEER            1.5f
+#define KP_STEER            3.0f
 #define KD_STEER            0.8f
 #define KP_PARK             2.0f
 #define KD_PARK             1.0f
@@ -63,9 +63,9 @@
 #define RAMP_DOWN_STEP      10
 
 // ═══ SERVO ═══
-#define SERVO_CENTER        90
-#define SERVO_MIN_ANGLE     45
-#define SERVO_MAX_ANGLE     135
+#define SERVO_CENTER        50
+#define SERVO_MIN_ANGLE     20
+#define SERVO_MAX_ANGLE     80
 #define MAX_SLEW_RATE       5.0f
 
 // ═══ STATE MACHINE ═══
